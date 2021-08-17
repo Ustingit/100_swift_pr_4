@@ -26,12 +26,14 @@ class ViewController: UIViewController, WKNavigationDelegate {
         
         let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
         let refresh = UIBarButtonItem(barButtonSystemItem: .refresh, target: webView, action: #selector(webView.reload))
+        let goForward = UIBarButtonItem(title: ">", style: .plain, target: webView, action: #selector(goForward))
+        let goBack = UIBarButtonItem(title: "<", style: .plain, target: webView, action: #selector(goBack))
         
         progressView = UIProgressView(progressViewStyle: .default)
         progressView.sizeToFit()
         let progressButton = UIBarButtonItem(customView: progressView)
         
-        toolbarItems = [progressButton, spacer, refresh]
+        toolbarItems = [goBack, progressButton, spacer, refresh, goForward]
         navigationController?.isToolbarHidden = false
         
         webView.addObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress), options: .new, context: nil)
@@ -39,6 +41,20 @@ class ViewController: UIViewController, WKNavigationDelegate {
         let url = URL(string: websites[0])!
         webView.load(URLRequest(url: url))
         webView.allowsBackForwardNavigationGestures = true
+    }
+    
+    @objc func goForward() {
+        if (webView.canGoForward) {
+            webView.goForward()
+            webView.reload()
+        }
+    }
+    
+    @objc func goBack() {
+        if (webView.canGoBack) {
+            webView.goBack()
+            webView.reload()
+        }
     }
 
     @objc func openTaped() {
@@ -80,6 +96,11 @@ class ViewController: UIViewController, WKNavigationDelegate {
                     return
                 }
             }
+            
+            let ac = UIAlertController(title: "DANGER", message: "You're tring to visit restricted site. Please go back to safety", preferredStyle: .alert)
+            ac.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+            
+            present(ac, animated: true)
         }
         
         decisionHandler(.cancel)
